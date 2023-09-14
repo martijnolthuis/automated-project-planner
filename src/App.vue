@@ -1,17 +1,17 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <h1>Stocktaking Planning</h1>
+  <StoreList />
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import StoreList from './components/StoreList.vue';
 
 export default {
   name: 'App',
   components: {
-    HelloWorld
-  }
-}
+    StoreList,
+  },
+};
 </script>
 
 <style>
