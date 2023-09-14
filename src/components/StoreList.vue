@@ -48,7 +48,15 @@
       </div>
     </div>
 
-    <!-- Placeholder for displaying the data in a table format without drag-n-drop functionality -->
+    <!-- Button to trigger store assignment across weekdays -->
+    <!-- It will only render if there are no stores in any weekdays -->
+    <button
+      @click="assignStoresToDays"
+      class="assign-button"
+      v-if="!hasStoresInWeekdays"
+    >
+      Assign Stores to Days
+    </button>
   </div>
 </template>
 
@@ -75,6 +83,17 @@ export default {
         Friday: [],
       },
     };
+  },
+  computed: {
+    /**
+     * Checks if any weekday has stores assigned.
+     * Returns true if at least one weekday has a store.
+     */
+    hasStoresInWeekdays() {
+      return Object.values(this.weekdays).some(
+        (dayStores) => dayStores.length > 0,
+      );
+    },
   },
   methods: {
     // Method to handle draggable constraints
@@ -103,6 +122,42 @@ export default {
       } else {
         console.error("Incorrectly formatted stores data:", newStores);
       }
+    },
+
+    /**
+     * Assigns stores to weekdays.
+     * This method handles the logic of distributing the stores evenly across the week based on the
+     * employee count to ensure a balanced workload throughout the week.
+     */
+    assignStoresToDays() {
+      // 1. Sort stores in descending order by employees
+      const sortedStores = [...this.stores].sort(
+        (a, b) => b.employees - a.employees,
+      );
+
+      // 2. Create a helper array for the weekdays
+      const dayBins = [
+        { day: "Monday", value: 0, stores: [] },
+        { day: "Tuesday", value: 0, stores: [] },
+        { day: "Wednesday", value: 0, stores: [] },
+        { day: "Thursday", value: 0, stores: [] },
+        { day: "Friday", value: 0, stores: [] },
+      ];
+
+      // 3. Assign each store to the day with the smallest total employees
+      for (const store of sortedStores) {
+        dayBins.sort((a, b) => a.value - b.value);
+        dayBins[0].stores.push(store);
+        dayBins[0].value += store.employees;
+      }
+
+      // 4. Update the main weekdays object with the result
+      for (const bin of dayBins) {
+        this.weekdays[bin.day] = bin.stores;
+      }
+
+      // Optional: Clear the all stores list after assignment
+      this.stores = [];
     },
   },
 };
@@ -192,5 +247,29 @@ h2 {
 
 h3 {
   font-size: 1.5em;
+}
+
+/* Button to assign stores to weekdays */
+.assign-button {
+  padding: 10px 20px;
+  font-size: 1.2em;
+  color: #fff;
+  background-color: #3498db; /* Base color for the button */
+  border: none;
+  border-radius: 6px;
+  margin-top: 20px;
+  cursor: pointer;
+  transition: background-color 0.3s; /* Transition effect for smooth color change */
+  outline: none; /* Remove the default focus outline for aesthetics */
+}
+
+/* Hover effect for the assign button */
+.assign-button:hover {
+  background-color: #2980b9; /* Darkened color for hover effect */
+}
+
+/* Active state effect for the assign button */
+.assign-button:active {
+  background-color: #2471a3; /* Further darkened color for active (pressed) state */
 }
 </style>
