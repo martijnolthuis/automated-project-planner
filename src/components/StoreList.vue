@@ -1,74 +1,59 @@
 <template>
+  <!-- Main Container for Store List and Upload Functionality -->
   <div>
-    <h2>Store List</h2>
+    <!-- Title for the Excel Importer Section -->
+    <h2>Upload Store Data</h2>
+    <!-- Excel Importer Component -->
     <ExcelImporter @update-stores="updateStores" />
 
-    <!-- All Stores Table -->
-    <table>
-      <thead>
-        <tr>
-          <th>All Stores</th>
-          <th>Number of Employees</th>
-        </tr>
-      </thead>
-      <tbody>
-        <draggable
-          :list="stores"
-          group="stores"
-          :move="checkMove"
-          class="drag-area"
-        >
-          <template #item="{ element, index }">
-            <tr :key="index">
-              <td>{{ element.storename }}</td>
-              <td>{{ element.employees }}</td>
-            </tr>
-          </template>
-        </draggable>
-        <tr v-if="!stores.length">
-          <td colspan="2">No stores imported yet.</td>
-        </tr>
-      </tbody>
-    </table>
+    <!-- Display All Stores List - This section displays all the stores available from the uploaded Excel -->
+    <h3>All Stores</h3>
+    <div class="draggable-container">
+      <draggable
+        :list="stores"
+        group="stores"
+        :move="checkMove"
+        class="drag-area"
+      >
+        <!-- Template for rendering each store -->
+        <template #item="{ element, index }">
+          <div :key="index" class="draggable-item">
+            {{ element.storename }} - {{ element.employees }} Employees
+          </div>
+        </template>
+      </draggable>
+    </div>
 
-    <!-- Days and their stores -->
+    <!-- Draggable Lists for each Weekday -->
     <div v-for="(dayStores, day) in weekdays" :key="day">
+      <!-- Display the day name and total employees for the day -->
       <h3>
         {{ day }} - Total Employees:
         {{ getTotalEmployees(dayStores) }}
       </h3>
-      <table>
-        <thead>
-          <tr>
-            <th>Store Name</th>
-            <th>Number of Employees</th>
-          </tr>
-        </thead>
-        <tbody>
-          <draggable
-            :list="dayStores"
-            group="stores"
-            :move="checkMove"
-            class="drag-area"
-          >
-            <template #item="{ element, index }">
-              <tr :key="index">
-                <td>{{ element.storename }}</td>
-                <td>{{ element.employees }}</td>
-              </tr>
-            </template>
-          </draggable>
-          <tr v-if="!dayStores.length">
-            <td colspan="2">No stores assigned yet</td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="draggable-container">
+        <draggable
+          :list="dayStores"
+          group="stores"
+          :move="checkMove"
+          class="drag-area"
+        >
+          <!-- Template for rendering each store under a specific weekday -->
+          <template #item="{ element, index }">
+            <div :key="index" class="draggable-item">
+              {{ element.storename }} - {{ element.employees }} Employees
+            </div>
+          </template>
+        </draggable>
+      </div>
     </div>
+
+    <!-- Placeholder for displaying the data in a table format without drag-n-drop functionality -->
   </div>
 </template>
 
 <script>
-// import { ref } from "vue";
+// Required imports for the component functionality
 import draggable from "vuedraggable";
 import ExcelImporter from "./ExcelImporter.vue";
 
@@ -80,22 +65,23 @@ export default {
   },
   data() {
     return {
-      stores: [],
+      stores: [], // Array to store all the stores from the uploaded Excel
       weekdays: {
+        // Object for storing stores categorized by weekdays
         Monday: [],
         Tuesday: [],
         Wednesday: [],
         Thursday: [],
         Friday: [],
-        Saturday: [],
-        Sunday: [],
       },
     };
   },
   methods: {
+    // Method to handle draggable constraints
     checkMove(evt) {
       return evt.draggedContext.index != evt.relatedContext.index;
     },
+    // Compute the total number of employees for a given day's store list
     getTotalEmployees(dayStores) {
       return dayStores.reduce((total, store) => {
         if (store && store.employees) {
@@ -104,6 +90,7 @@ export default {
         return total;
       }, 0);
     },
+    // Update the main store list upon successful Excel import
     updateStores(newStores) {
       if (
         newStores &&
@@ -122,132 +109,88 @@ export default {
 </script>
 
 <style scoped>
-.drag-area {
-  width: 100%;
-}
-
-.store-row {
-  transition: background-color 0.3s;
-  cursor: pointer;
-}
-
-.store-row:hover {
-  background-color: #e9ecef;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 20px;
-}
-
-th,
-td {
+.draggable-container {
+  border: 1px solid #ccc;
   padding: 10px;
-  border: 1px solid #dee2e6;
-  text-align: left;
-}
-
-thead {
-  background-color: #f8f9fa;
-}
-
-h2,
-h3 {
-  text-align: center;
   margin-bottom: 20px;
-}
-</style>
-
-<style scoped>
-.drag-area {
-  width: 100%;
-}
-
-.store-row {
-  transition: background-color 0.3s;
-  cursor: pointer;
-}
-
-.store-row:hover {
-  background-color: #e9ecef;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 20px;
-}
-
-th,
-td {
-  padding: 10px;
-  border: 1px solid #dee2e6;
-  text-align: left;
-}
-
-thead {
-  background-color: #f8f9fa;
-}
-
-h2,
-h3 {
-  text-align: center;
-  margin-bottom: 20px;
-}
-</style>
-
-<style scoped>
-.drag-area {
-  width: 100%;
-}
-.store-row {
-  transition: background-color 0.3s;
-  cursor: pointer;
-}
-
-.store-row:hover {
-  background-color: #e9ecef;
-}
-
-table {
-  border-collapse: collapse;
-  width: 60%;
+  min-height: 50px;
+  max-width: 95%;
   margin: 0 auto;
-  table-layout: fixed;
+  background-color: #eaecee; /* A slightly darker shade for contrast */
 }
 
-th,
-td {
-  padding: 12px;
-  text-align: left;
-  border: 1px solid #ddd;
+.draggable-item {
+  padding: 10px 15px;
+  margin: 10px auto;
+  background-color: #ffffff;
+  border: 1px solid #eaeaea;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s;
 }
 
-th {
-  background-color: #f2f2f2;
-  white-space: nowrap; /* add this line to prevent text wrapping */
-}
-
-td {
-  width: 200%; /* add this line to make the td elements as wide as the th elements */
-}
-
-tr:nth-child(even) {
-  background-color: #f2f2f2;
-}
-
-tr:hover {
-  background-color: #ddd;
-}
-
-thead {
-  background-color: #f8f9fa;
+.draggable-item:hover {
+  background-color: #f1f1f1;
 }
 
 h2,
 h3 {
+  color: #333333;
+  margin-top: 40px;
   text-align: center;
+}
+
+h2 {
+  font-size: 2em;
+}
+
+h3 {
+  font-size: 1.5em;
+}
+
+/* You can add a touch of color for accent, such as blue for actionable buttons or highlights. */
+</style>
+
+<style scoped>
+/* Styles for the drag-and-drop container */
+.draggable-container {
+  border: 1px solid #ccc;
+  padding: 10px;
   margin-bottom: 20px;
+  min-height: 50px;
+  max-width: 95%;
+  margin: 0 auto;
+  background-color: #eaecee; /* A slightly darker shade for contrast */
+}
+
+/* Styles for individual draggable items */
+.draggable-item {
+  padding: 10px 15px;
+  margin: 10px auto;
+  background-color: #ffffff;
+  border: 1px solid #eaeaea;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.draggable-item:hover {
+  background-color: #f1f1f1;
+}
+
+/* Styling for the main and sub-headers */
+h2,
+h3 {
+  color: #333333;
+  margin-top: 40px;
+  text-align: center;
+}
+
+h2 {
+  font-size: 2em;
+}
+
+h3 {
+  font-size: 1.5em;
 }
 </style>
